@@ -88,28 +88,37 @@ def plot_bar_chart_district(df):
 # Function to plot bar chart for Change by Sub County
 def plot_change_by_sub_county(df, title):
     if 'DistrictName' in df.columns:
-        df['Total'] = df['Total'].str.rstrip('%').astype('float') / 100.0
-        plt.figure(figsize=(18, 12))
-        sns.set(style="whitegrid")
-        bar_plot = sns.barplot(x='DistrictName', y='Total', data=df, palette=custom_palette)
-        bar_plot.set_title(title, fontsize=16)
-        bar_plot.set_xlabel('Sub County', fontsize=14)
-        bar_plot.set_ylabel('Percentage', fontsize=14)
-        bar_plot.set_xticklabels(bar_plot.get_xticklabels(), rotation=45, horizontalalignment='right', fontsize=12)
-        for p in bar_plot.patches:
-            bar_plot.annotate(format(p.get_height() * 100, '.1f') + '%', 
-                              (p.get_x() + p.get_width() / 2., p.get_height()), 
-                              ha='center', va='center', 
-                              xytext=(0, 9), 
-                              textcoords='offset points',
-                              fontsize=10)
-        st.pyplot(plt)
+        if 'Total' in df.columns:
+            try:
+                df['Total'] = df['Total'].str.rstrip('%').astype('float') / 100.0
+            except AttributeError:
+                # The 'Total' column is already numeric
+                pass
+            plt.figure(figsize=(18, 12))
+            sns.set(style="whitegrid")
+            bar_plot = sns.barplot(x='DistrictName', y='Total', data=df, palette=custom_palette)
+            bar_plot.set_title(title, fontsize=16)
+            bar_plot.set_xlabel('Sub County', fontsize=14)
+            bar_plot.set_ylabel('Percentage', fontsize=14)
+            bar_plot.set_xticklabels(bar_plot.get_xticklabels(), rotation=45, horizontalalignment='right', fontsize=12)
+            for p in bar_plot.patches:
+                bar_plot.annotate(format(p.get_height() * 100, '.1f') + '%', 
+                                  (p.get_x() + p.get_width() / 2., p.get_height()), 
+                                  ha='center', va='center', 
+                                  xytext=(0, 9), 
+                                  textcoords='offset points',
+                                  fontsize=10)
+            st.pyplot(plt)
+        else:
+            st.error("Column 'Total' does not exist in the dataset.")
     else:
         st.error("Column 'DistrictName' does not exist in the dataset.")
+
 
 # Function to plot bar chart for Change by Location
 def plot_change_by_location(df, title):
     if 'LocationName' in df.columns:
+        df = df[df['LocationName'] != 'Total']  # Remove 'Total' row
         df.set_index('LocationName').plot(kind='bar', stacked=True, figsize=(18, 12), color=custom_palette)
         plt.title(title, fontsize=16)
         plt.xlabel('Location', fontsize=14)
@@ -214,6 +223,8 @@ elif page == "Visualization":
             values_file = files[2]
             variable_name = files[3]
             values_df = load_data(values_file)
+
+        st.write(f"## {selected_dataset} Dataset Visualizations")
 
         # Checkboxes for selecting plot types
         col1, col2, col3 = st.columns(3)
