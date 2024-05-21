@@ -142,12 +142,12 @@ if page == "About":
     st.write("""
         Third Party Quality Assurance for Phase II for Households' Registration Under the Enhanced Single Registry for the Kenya Social Inclusion Project(KSEIP)
 
-        KISII COUNTY TPQA Analysis report
+        **KISII COUNTY TPQA Analysis report**
         
         - **Visualize** the data with interactive plots.
         - **Analyze** descriptive statistics.
         
-        Streamlit makes it easy to build and share data apps!
+       
     """)
 
 elif page == "Visualization":
