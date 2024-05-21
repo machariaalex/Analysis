@@ -140,9 +140,9 @@ page = st.sidebar.radio("Select Page", ["About", "Visualization"])
 if page == "About":
     st.title("About This Project")
     st.write("""
-        This is a data visualization project created using Streamlit. 
-        You can use this app to visualize predefined datasets 
-        through various plots and statistics.
+        Third Party Quality Assurance for Phase II for Households' Registration Under the Enhanced Single Registry for the Kenya Social Inclusion Project(KSEIP)
+
+        KISII COUNTY TPQA Analysis report
         
         - **Visualize** the data with interactive plots.
         - **Analyze** descriptive statistics.
