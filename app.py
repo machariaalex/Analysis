@@ -10,7 +10,7 @@ def load_data(file_path):
     return pd.read_csv(file_path)
 
 # Custom palette for plots
-custom_palette = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "yellow", "green", "red"]
+brand_colors = ["#B74106", "#01895C", "#035539"]
 
 # Load Declined Consent dataset
 declined_consent = pd.read_excel('Declined Consent.xlsx')
@@ -22,7 +22,7 @@ def plot_pie_chart(df):
         plt.figure(figsize=(12, 16), facecolor='white')
         wedges, texts, autotexts = plt.pie(
             decline_reason_counts, labels=decline_reason_counts.index, autopct='%1.1f%%',
-            startangle=140, colors=custom_palette[:len(decline_reason_counts)]
+            startangle=140, colors=brand_colors[:len(decline_reason_counts)]
         )
         plt.setp(autotexts, size=10, color="black")
         plt.setp(texts, size=12)
@@ -40,7 +40,7 @@ def plot_heatmap(df):
     if 'LocationName' in df.columns and 'DeclineReasonId' in df.columns:
         pivot_table = df.pivot_table(index='LocationName', columns='DeclineReasonId', aggfunc='size', fill_value=0)
         plt.figure(figsize=(18, 16))
-        sns.heatmap(pivot_table, annot=True, fmt="d", cmap="YlGnBu", cbar_kws={'label': 'Count'})
+        sns.heatmap(pivot_table, annot=True, fmt="d", cmap=sns.color_palette(brand_colors, as_cmap=True), cbar_kws={'label': 'Count'})
         plt.title('Heatmap of Decline Consent Counts for Each Location')
         plt.xlabel('Decline Consent')
         plt.ylabel('Location')
@@ -55,7 +55,7 @@ def plot_bar_chart_location(df):
     if 'LocationName' in df.columns and 'DeclineReasonId' in df.columns:
         pivot_table = df.pivot_table(index='LocationName', columns='DeclineReasonId', aggfunc='size', fill_value=0)
         plt.figure(figsize=(14, 8))
-        pivot_table.plot(kind='bar', stacked=True, figsize=(14, 8), color=custom_palette[:len(pivot_table.columns)])
+        pivot_table.plot(kind='bar', stacked=True, figsize=(14, 8), color=brand_colors[:len(pivot_table.columns)])
         plt.title('Count of Each DeclineReasonId for Each LocationName')
         plt.xlabel('LocationName')
         plt.ylabel('Count')
@@ -73,7 +73,7 @@ def plot_bar_chart_district(df):
         district_decline_counts.columns = ['DistrictName', 'DeclineReasonId_Count']
         plt.figure(figsize=(18, 12))
         sns.set(style="whitegrid")
-        bar_plot = sns.barplot(x='DistrictName', y='DeclineReasonId_Count', data=district_decline_counts, palette=custom_palette)
+        bar_plot = sns.barplot(x='DistrictName', y='DeclineReasonId_Count', data=district_decline_counts, palette=brand_colors)
         bar_plot.set_title('Distribution of DeclineReasonId Counts for Each Sub County', fontsize=16)
         bar_plot.set_xlabel('Sub County', fontsize=14)
         bar_plot.set_ylabel('Declined Consent', fontsize=14)
@@ -101,7 +101,7 @@ def plot_change_by_sub_county(df, title):
                 pass
             plt.figure(figsize=(18, 12))
             sns.set(style="whitegrid")
-            bar_plot = sns.barplot(x='DistrictName', y='Total', data=df, palette=custom_palette)
+            bar_plot = sns.barplot(x='DistrictName', y='Total', data=df, palette=brand_colors)
             bar_plot.set_title(title, fontsize=16)
             bar_plot.set_xlabel('Sub County', fontsize=14)
             bar_plot.set_ylabel('Percentage', fontsize=14)
@@ -124,7 +124,7 @@ def plot_change_by_sub_county(df, title):
 def plot_change_by_location(df, title):
     if 'LocationName' in df.columns:
         df = df[df['LocationName'] != 'Total']  # Remove 'Total' row
-        df.set_index('LocationName').plot(kind='bar', stacked=True, figsize=(18, 12), color=custom_palette)
+        df.set_index('LocationName').plot(kind='bar', stacked=True, figsize=(18, 12), color=brand_colors)
         plt.title(title, fontsize=16)
         plt.xlabel('Location', fontsize=14)
         plt.ylabel('Count', fontsize=14)
@@ -138,7 +138,7 @@ def plot_change_by_location(df, title):
 # Function to plot bar chart for Values
 def plot_values_distribution(df, title, variable_name):
     if variable_name in df.columns:
-        df.set_index(variable_name)[['First_visit', 'Second_visit']].plot(kind='bar', figsize=(18, 12), color=custom_palette[:2])
+        df.set_index(variable_name)[['First_visit', 'Second_visit']].plot(kind='bar', figsize=(18, 12), color=brand_colors[:2])
         plt.title(title, fontsize=16)
         plt.xlabel(variable_name, fontsize=14)
         plt.ylabel('Values', fontsize=14)
@@ -149,11 +149,12 @@ def plot_values_distribution(df, title, variable_name):
     else:
         st.error(f"Column '{variable_name}' does not exist in the dataset.")
 
-def get_image_download_link(img, filename, text):
-    buffered = BytesIO()
-    img.savefig(buffered, format="png")
-    img_data = buffered.getvalue()
-    return st.download_button(label=text, data=img_data, file_name=filename, mime="image/png")
+# Function to create a download link for the plots
+def get_image_download_link(fig, filename, text):
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    st.download_button(label=text, data=buf, file_name=filename, mime="image/png")
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
@@ -198,25 +199,25 @@ elif page == "Visualization":
             st.write("### Pie Chart of Declined Reasons")
             pie_chart = plot_pie_chart(declined_consent)
             if pie_chart:
-                get_image_download_link(pie_chart, "pie_chart.png", "Download")
+                get_image_download_link(pie_chart, "pie_chart.png", "Download Pie Chart")
 
         if show_heatmap:
             st.write("### Heatmap of Decline Consent Counts for Each Location")
             heatmap = plot_heatmap(declined_consent)
             if heatmap:
-                get_image_download_link(heatmap, "heatmap.png", "Download")
+                get_image_download_link(heatmap, "heatmap.png", "Download Heatmap")
 
         if show_bar_plot_location:
             st.write("### Bar Chart of Decline Reasons by Location")
             bar_chart_location = plot_bar_chart_location(declined_consent)
             if bar_chart_location:
-                get_image_download_link(bar_chart_location, "bar_chart_location.png", "Download")
+                get_image_download_link(bar_chart_location, "bar_chart_location.png", "Download Bar Chart")
 
         if show_stacked_bar_plot:
             st.write("### Bar Chart of Decline Reasons by Sub County")
             bar_chart_district = plot_bar_chart_district(declined_consent)
             if bar_chart_district:
-                get_image_download_link(bar_chart_district, "bar_chart_district.png", "Download")
+                get_image_download_link(bar_chart_district, "bar_chart_district.png", "Download Bar Chart")
 
     else:
         file_mapping = {
@@ -258,16 +259,16 @@ elif page == "Visualization":
             st.write(f"### {selected_dataset} by Sub County")
             change_by_sub_county_chart = plot_change_by_sub_county(district_df, f"{selected_dataset} by Sub County")
             if change_by_sub_county_chart:
-                get_image_download_link(change_by_sub_county_chart, "change_by_sub_county.png", "Download")
+                get_image_download_link(change_by_sub_county_chart, f"{selected_dataset}_by_sub_county.png", "Download Chart")
 
         if show_location_bar_chart:
             st.write(f"### {selected_dataset} by Location")
             change_by_location_chart = plot_change_by_location(location_df, f"{selected_dataset} by Location")
             if change_by_location_chart:
-                get_image_download_link(change_by_location_chart, "change_by_location.png", "Download")
+                get_image_download_link(change_by_location_chart, f"{selected_dataset}_by_location.png", "Download Chart")
 
         if values_df is not None and show_values_distribution:
             st.write(f"### {selected_dataset} Values")
             values_distribution_chart = plot_values_distribution(values_df, f"{selected_dataset} Values", variable_name)
             if values_distribution_chart:
-                get_image_download_link(values_distribution_chart, "values_distribution.png", "Download")
+                get_image_download_link(values_distribution_chart, f"{selected_dataset}_values.png", "Download Chart")
