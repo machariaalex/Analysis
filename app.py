@@ -10,7 +10,7 @@ def load_data(file_path):
     return pd.read_csv(file_path)
 
 # Custom palette for plots
-brand_colors = ["#B74106", "#01895C", "#035539"]
+brand_colors = ["#F36E2C", "#01895C",'#035539', "#B74106"]
 
 # Load Declined Consent dataset
 declined_consent = pd.read_excel('Declined Consent.xlsx')
