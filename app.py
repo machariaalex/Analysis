@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from io import BytesIO
 
 # Load the dataset
 @st.cache_data
@@ -30,6 +31,7 @@ def plot_pie_chart(df):
         plt.title('Distribution of Declined Reasons')
         plt.axis('equal')
         st.pyplot(plt)
+        return plt
     else:
         st.error("Column 'DeclineReasonId' does not exist in the dataset.")
 
@@ -44,6 +46,7 @@ def plot_heatmap(df):
         plt.ylabel('Location')
         plt.xticks(rotation=90)
         st.pyplot(plt)
+        return plt
     else:
         st.error("Required columns do not exist in the dataset.")
 
@@ -59,6 +62,7 @@ def plot_bar_chart_location(df):
         plt.legend(title='DeclineReasonId')
         plt.xticks(rotation=90)
         st.pyplot(plt)
+        return plt
     else:
         st.error("Required columns do not exist in the dataset.")
 
@@ -82,6 +86,7 @@ def plot_bar_chart_district(df):
                               textcoords='offset points',
                               fontsize=10)
         st.pyplot(plt)
+        return plt
     else:
         st.error("Required columns do not exist in the dataset.")
 
@@ -109,11 +114,11 @@ def plot_change_by_sub_county(df, title):
                                   textcoords='offset points',
                                   fontsize=10)
             st.pyplot(plt)
+            return plt
         else:
             st.error("Column 'Total' does not exist in the dataset.")
     else:
         st.error("Column 'DistrictName' does not exist in the dataset.")
-
 
 # Function to plot bar chart for Change by Location
 def plot_change_by_location(df, title):
@@ -126,6 +131,7 @@ def plot_change_by_location(df, title):
         plt.xticks(rotation=45, horizontalalignment='right', fontsize=12)
         plt.legend(title='Status')
         st.pyplot(plt)
+        return plt
     else:
         st.error("Column 'LocationName' does not exist in the dataset.")
 
@@ -139,8 +145,15 @@ def plot_values_distribution(df, title, variable_name):
         plt.xticks(rotation=45, horizontalalignment='right', fontsize=12)
         plt.legend(title='Visit')
         st.pyplot(plt)
+        return plt
     else:
         st.error(f"Column '{variable_name}' does not exist in the dataset.")
+
+def get_image_download_link(img, filename, text):
+    buffered = BytesIO()
+    img.savefig(buffered, format="png")
+    img_data = buffered.getvalue()
+    return st.download_button(label=text, data=img_data, file_name=filename, mime="image/png")
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
@@ -155,8 +168,6 @@ if page == "About":
         
         - **Visualize** the data with interactive plots.
         - **Analyze** descriptive statistics.
-        
-       
     """)
 
 elif page == "Visualization":
@@ -185,19 +196,27 @@ elif page == "Visualization":
 
         if show_pie_chart:
             st.write("### Pie Chart of Declined Reasons")
-            plot_pie_chart(declined_consent)
+            pie_chart = plot_pie_chart(declined_consent)
+            if pie_chart:
+                get_image_download_link(pie_chart, "pie_chart.png", "Download")
 
         if show_heatmap:
             st.write("### Heatmap of Decline Consent Counts for Each Location")
-            plot_heatmap(declined_consent)
+            heatmap = plot_heatmap(declined_consent)
+            if heatmap:
+                get_image_download_link(heatmap, "heatmap.png", "Download")
 
         if show_bar_plot_location:
             st.write("### Bar Chart of Decline Reasons by Location")
-            plot_bar_chart_location(declined_consent)
+            bar_chart_location = plot_bar_chart_location(declined_consent)
+            if bar_chart_location:
+                get_image_download_link(bar_chart_location, "bar_chart_location.png", "Download")
 
         if show_stacked_bar_plot:
             st.write("### Bar Chart of Decline Reasons by Sub County")
-            plot_bar_chart_district(declined_consent)
+            bar_chart_district = plot_bar_chart_district(declined_consent)
+            if bar_chart_district:
+                get_image_download_link(bar_chart_district, "bar_chart_district.png", "Download")
 
     else:
         file_mapping = {
@@ -237,12 +256,18 @@ elif page == "Visualization":
 
         if show_district_bar_chart:
             st.write(f"### {selected_dataset} by Sub County")
-            plot_change_by_sub_county(district_df, f"{selected_dataset} by Sub County")
+            change_by_sub_county_chart = plot_change_by_sub_county(district_df, f"{selected_dataset} by Sub County")
+            if change_by_sub_county_chart:
+                get_image_download_link(change_by_sub_county_chart, "change_by_sub_county.png", "Download")
 
         if show_location_bar_chart:
             st.write(f"### {selected_dataset} by Location")
-            plot_change_by_location(location_df, f"{selected_dataset} by Location")
+            change_by_location_chart = plot_change_by_location(location_df, f"{selected_dataset} by Location")
+            if change_by_location_chart:
+                get_image_download_link(change_by_location_chart, "change_by_location.png", "Download")
 
         if values_df is not None and show_values_distribution:
             st.write(f"### {selected_dataset} Values")
-            plot_values_distribution(values_df, f"{selected_dataset} Values", variable_name)
+            values_distribution_chart = plot_values_distribution(values_df, f"{selected_dataset} Values", variable_name)
+            if values_distribution_chart:
+                get_image_download_link(values_distribution_chart, "values_distribution.png", "Download")
