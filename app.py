@@ -173,7 +173,7 @@ if page == "About":
 
 elif page == "Visualization":
     st.title("Data Visualization")
-    st.subheader("Select Dataset")
+    st.subheader("Select Variable")
 
     # Define datasets
     datasets = ["Declined Consent", "Floor Mismatch", "Roof Mismatch", "Lighting Mismatch",
@@ -181,7 +181,7 @@ elif page == "Visualization":
                 "Water Source Mismatch", "Wall Mismatch"]
 
     # Display radio buttons in a single layout
-    selected_dataset = st.radio("Select Dataset", datasets, index=0)
+    selected_dataset = st.radio("Select Variable", datasets, index=0)
 
     if selected_dataset == "Declined Consent":
         st.write("## Declined Consent Dataset Visualizations")
