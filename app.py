@@ -10,7 +10,7 @@ def load_data(file_path):
     return pd.read_csv(file_path)
 
 # Custom palette for plots
-brand_colors = ["#F36E2C", "#01895C",'#035539', "#B74106"]
+brand_colors = ["#F36E2C", "#01895C", "#035539", "#B74106"]
 
 # Load Declined Consent dataset
 declined_consent = pd.read_excel('Declined Consent.xlsx')
@@ -173,102 +173,139 @@ if page == "About":
 
 elif page == "Visualization":
     st.title("Data Visualization")
-    st.subheader("Select Variable")
+    st.subheader("Select Dataset")
 
     # Define datasets
-    datasets = ["Declined Consent", "Floor Mismatch", "Roof Mismatch", "Lighting Mismatch",
-                "Habitable Rooms Mismatch", "Cooking Fuel Mismatch", "Waste Disposal Mismatch",
-                "Water Source Mismatch", "Wall Mismatch"]
+    datasets = [
+        "Declined Consent", "Floor Mismatch", "Roof Mismatch", "Lighting Mismatch",
+        "Habitable Rooms Mismatch", "Cooking Fuel Mismatch", "Waste Disposal Mismatch",
+        "Water Source Mismatch", "Wall Mismatch",
+        "Head DOB", "Head Education", "Head ID", "Member Names", "Orphans",
+        "Relationship Head", "Size", "Spouse DOB", "Spouse Education", "Spouse ID", "Summary"
+    ]
 
-    # Display radio buttons in a single layout
-    selected_dataset = st.radio("Select Variable", datasets, index=0)
+    # Split datasets into two columns
+    col1, col2 = st.columns(2)
+    selected_datasets = []
 
-    if selected_dataset == "Declined Consent":
-        st.write("## Declined Consent Dataset Visualizations")
+    with col1:
+        for dataset in datasets[:10]:
+            if st.checkbox(dataset):
+                selected_datasets.append(dataset)
 
-        # Checkboxes for selecting plot types
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            show_pie_chart = st.checkbox("Pie Chart")
-            show_heatmap = st.checkbox("Heatmap")
-        with col2:
-            show_bar_plot_location = st.checkbox("Location Bar Chart")
-            show_stacked_bar_plot = st.checkbox("Sub County Bar Chart")
+    with col2:
+        for dataset in datasets[10:]:
+            if st.checkbox(dataset):
+                selected_datasets.append(dataset)
 
-        if show_pie_chart:
-            st.write("### Pie Chart of Declined Reasons")
-            pie_chart = plot_pie_chart(declined_consent)
-            if pie_chart:
-                get_image_download_link(pie_chart, "pie_chart.png", "Download Pie Chart")
+    # Display the selected dataset
+    if len(selected_datasets) == 1:
+        selected_dataset = selected_datasets[0]
 
-        if show_heatmap:
-            st.write("### Heatmap of Decline Consent Counts for Each Location")
-            heatmap = plot_heatmap(declined_consent)
-            if heatmap:
-                get_image_download_link(heatmap, "heatmap.png", "Download Heatmap")
+        if selected_dataset == "Declined Consent":
+            st.write("## Declined Consent Dataset Visualizations")
 
-        if show_bar_plot_location:
-            st.write("### Bar Chart of Decline Reasons by Location")
-            bar_chart_location = plot_bar_chart_location(declined_consent)
-            if bar_chart_location:
-                get_image_download_link(bar_chart_location, "bar_chart_location.png", "Download Bar Chart")
+            # Checkboxes for selecting plot types
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                show_pie_chart = st.checkbox("Pie Chart")
+                show_heatmap = st.checkbox("Heatmap")
+            with col2:
+                show_bar_plot_location = st.checkbox("Location Bar Chart")
+                show_stacked_bar_plot = st.checkbox("Sub County Bar Chart")
 
-        if show_stacked_bar_plot:
-            st.write("### Bar Chart of Decline Reasons by Sub County")
-            bar_chart_district = plot_bar_chart_district(declined_consent)
-            if bar_chart_district:
-                get_image_download_link(bar_chart_district, "bar_chart_district.png", "Download Bar Chart")
+            if show_pie_chart:
+                st.write("### Pie Chart of Declined Reasons")
+                pie_chart = plot_pie_chart(declined_consent)
+                if pie_chart:
+                    get_image_download_link(pie_chart, "pie_chart.png", "Download Pie Chart")
 
+            if show_heatmap:
+                st.write("### Heatmap of Decline Consent Counts for Each Location")
+                heatmap = plot_heatmap(declined_consent)
+                if heatmap:
+                    get_image_download_link(heatmap, "heatmap.png", "Download Heatmap")
+
+            if show_bar_plot_location:
+                st.write("### Bar Chart of Decline Reasons by Location")
+                bar_chart_location = plot_bar_chart_location(declined_consent)
+                if bar_chart_location:
+                    get_image_download_link(bar_chart_location, "bar_chart_location.png", "Download Bar Chart")
+
+            if show_stacked_bar_plot:
+                st.write("### Bar Chart of Decline Reasons by Sub County")
+                bar_chart_district = plot_bar_chart_district(declined_consent)
+                if bar_chart_district:
+                    get_image_download_link(bar_chart_district, "bar_chart_district.png", "Download Bar Chart")
+
+        else:
+            file_mapping = {
+                "Floor Mismatch": ("floordistrict.csv", "floorlocation.csv", "floorvalues.csv", "Floor.x"),
+                "Roof Mismatch": ("roofdistrict.csv", "rooflocation.csv", "roofvalues.csv", "Roof.x"),
+                "Lighting Mismatch": ("lightdistrict.csv", "lightlocation.csv", "lightvalues.csv", "LightingFuel.x"),
+                "Habitable Rooms Mismatch": ("roomdistrict.csv", "roomslocation.csv"),
+                "Cooking Fuel Mismatch": ("cookingdistrict.csv", "cookinglocation.csv", "cookingvalues.csv", "CookingFuel.x"),
+                "Waste Disposal Mismatch": ("toiletdistrict.csv", "toiletlocation.csv", "toiletvalues.csv", "HumanWasteDisposal.x"),
+                "Water Source Mismatch": ("waterdistrict.csv", "waterlocation.csv", "watervalues.csv", "WaterSource.x"),
+                "Wall Mismatch": ("walldistrict.csv", "wall location.csv", "wallvalues.csv", "Wall.x"),
+                "Head DOB": ("headdobdistrict.csv", "headdoblocation.csv"),
+                "Head Education": ("headedudistrict.csv", "headedulocation.csv"),
+                "Head ID": ("headiddistrict.csv", "headidlocation.csv"),
+                "Member Names": ("membernamesdistrict.csv", "membernameslocation.csv"),
+                "Orphans": ("opharndistrict.csv", "opharnlocation.csv"),
+                "Relationship Head": ("relatioshipheaddistrict.csv", "relatioshipheadlocation.csv"),
+                "Size": ("sizedistrict.csv", "sizelocation.csv"),
+                "Spouse DOB": ("spousedobdistrict.csv", "spousedoblocation.csv"),
+                "Spouse Education": ("spouseedudistrict.csv", "spouseedulocation.csv"),
+                "Spouse ID": ("spouseiddistrict.csv", "spouseidlocation.csv"),
+                "Summary": ("summary.csv",)
+            }
+
+            files = file_mapping[selected_dataset]
+
+            # Load datasets
+            district_df = load_data(files[0])
+            location_df = load_data(files[1]) if len(files) > 1 else None
+            values_df = None
+            variable_name = None
+
+            if len(files) > 2:
+                values_file = files[2]
+                variable_name = files[3]
+                values_df = load_data(values_file)
+
+            st.write(f"## {selected_dataset} Dataset Visualizations")
+
+            # Checkboxes for selecting plot types
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                show_district_bar_chart = st.checkbox(f"{selected_dataset} by Sub County")
+                if location_df is not None:
+                    show_location_bar_chart = st.checkbox(f"{selected_dataset} by Location")
+            with col2:
+                if values_df is not None:
+                    show_values_distribution = st.checkbox(f"{selected_dataset} Frequencies")
+
+            if show_district_bar_chart:
+                st.write(f"### {selected_dataset} by Sub County")
+                change_by_sub_county_chart = plot_change_by_sub_county(district_df, f"{selected_dataset} by Sub County")
+                if change_by_sub_county_chart:
+                    get_image_download_link(change_by_sub_county_chart, f"{selected_dataset}_by_sub_county.png", "Download Chart")
+
+            if location_df is not None and show_location_bar_chart:
+                st.write(f"### {selected_dataset} by Location")
+                change_by_location_chart = plot_change_by_location(location_df, f"{selected_dataset} by Location")
+                if change_by_location_chart:
+                    get_image_download_link(change_by_location_chart, f"{selected_dataset}_by_location.png", "Download Chart")
+
+            if values_df is not None and show_values_distribution:
+                st.write(f"### {selected_dataset} Frequencies")
+                values_distribution_chart = plot_values_distribution(values_df, f"{selected_dataset} Frequencies", variable_name)
+                if values_distribution_chart:
+                    get_image_download_link(values_distribution_chart, f"{selected_dataset}Frequencies.png", "Download Chart")
+
+    elif len(selected_datasets) > 1:
+        st.error("Please select only one dataset at a time.")
     else:
-        file_mapping = {
-            "Floor Mismatch": ("floordistrict.csv", "floorlocation.csv", "floorvalues.csv", "Floor.x"),
-            "Roof Mismatch": ("roofdistrict.csv", "rooflocation.csv", "roofvalues.csv", "Roof.x"),
-            "Lighting Mismatch": ("lightdistrict.csv", "lightlocation.csv", "lightvalues.csv", "LightingFuel.x"),
-            "Habitable Rooms Mismatch": ("roomdistrict.csv", "roomslocation.csv"),
-            "Cooking Fuel Mismatch": ("cookingdistrict.csv", "cookinglocation.csv", "cookingvalues.csv", "CookingFuel.x"),
-            "Waste Disposal Mismatch": ("toiletdistrict.csv", "toiletlocation.csv", "toiletvalues.csv", "HumanWasteDisposal.x"),
-            "Water Source Mismatch": ("waterdistrict.csv", "waterlocation.csv", "watervalues.csv", "WaterSource.x"),
-            "Wall Mismatch": ("walldistrict.csv", "wall location.csv", "wallvalues.csv", "Wall.x")
-        }
+        st.info("Please select a variable from the options above.")
 
-        files = file_mapping[selected_dataset]
-
-        # Load datasets
-        district_df = load_data(files[0])
-        location_df = load_data(files[1])
-        values_df = None
-        variable_name = None
-
-        if len(files) > 2:
-            values_file = files[2]
-            variable_name = files[3]
-            values_df = load_data(values_file)
-
-        st.write(f"## {selected_dataset} Dataset Visualizations")
-
-        # Checkboxes for selecting plot types
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            show_district_bar_chart = st.checkbox(f"{selected_dataset} by Sub County")
-            show_location_bar_chart = st.checkbox(f"{selected_dataset} by Location")
-        with col2:
-            if values_df is not None:
-                show_values_distribution = st.checkbox(f"{selected_dataset} Values")
-
-        if show_district_bar_chart:
-            st.write(f"### {selected_dataset} by Sub County")
-            change_by_sub_county_chart = plot_change_by_sub_county(district_df, f"{selected_dataset} by Sub County")
-            if change_by_sub_county_chart:
-                get_image_download_link(change_by_sub_county_chart, f"{selected_dataset}_by_sub_county.png", "Download Chart")
-
-        if show_location_bar_chart:
-            st.write(f"### {selected_dataset} by Location")
-            change_by_location_chart = plot_change_by_location(location_df, f"{selected_dataset} by Location")
-            if change_by_location_chart:
-                get_image_download_link(change_by_location_chart, f"{selected_dataset}_by_location.png", "Download Chart")
-
-        if values_df is not None and show_values_distribution:
-            st.write(f"### {selected_dataset} Values")
-            values_distribution_chart = plot_values_distribution(values_df, f"{selected_dataset} Values", variable_name)
-            if values_distribution_chart:
-                get_image_download_link(values_distribution_chart, f"{selected_dataset}_values.png", "Download Chart")
